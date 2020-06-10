@@ -75,8 +75,10 @@ The robot is defined according to the DH table and its parameter are defined and
 The model is saved as ```PANDA```.
 
 The following paramters are used: 
-$$d1 = 0.333;d3=0.316;d5=0.384;a4=0.0825;a5=-0.0825;a7=0.088;$$
-$$m1=3.4525; m2=3.4821; m3=4.0562; m4=3.4822; m5=2.1633; m6=2.3466; m7=0.31290;$$
+<!-- $$d1 = 0.333;d3=0.316;d5=0.384;a4=0.0825;a5=-0.0825;a7=0.088;$$
+$$m1=3.4525; m2=3.4821; m3=4.0562; m4=3.4822; m5=2.1633; m6=2.3466; m7=0.31290;$$ -->
+
+![](./images/2020-06-10-19-31-49.png)
 The parameters are found in  [this online repository](https://github.com/marcocognetti/FrankaEmikaPandaDynModel.git) while the exact procedure is described here:
 
 [Dynamic Identification of the Franka Emika Panda Robot with Retrieval of Feasible Parameter Using Penalty-based Optimization](https://hal.inria.fr/hal-02265293/document)
@@ -102,8 +104,8 @@ $$ L7 = Link([0,0,  a7,  pi/2])   $$ -->
 
 <p align="center">
   <!-- <img align="Center" src="./images/2020-06-04-01-14-39.png" alt="drawing" class="center" width="250" /> -->
-  <img align="Center" src="./images/2020-06-03-11-50-45.png" alt="drawing" class="center" width="500" />
-  <img src="./images/2020-05-27-17-00-51.png" alt="drawing" class="bottom" width="400" margin="100" />
+  <img align="Center" src="./images/2020-06-03-11-50-45.png" alt="drawing" class="center" width="600" />
+  <img src="./images/2020-05-27-17-00-51.png" alt="drawing" class="bottom" width="600" margin="100" />
 </p>
 
 
@@ -148,13 +150,13 @@ Each trajectory will now be discussed in details with the implemented controller
 
 Initial Conditions
 
-
-$$ q_{ini} = [0, 0, 0, 0, 0, 0, 0] $$
+![](./images/2020-06-10-19-32-33.png)
+<!-- $$ q_{ini} = [0, 0, 0, 0, 0, 0, 0] $$ -->
 
 Final Conditions
 
-
-$$ q_{des} = [pi/3, 0, pi/3, pi/3, pi/6, 0 , 0]$$
+![](./images/2020-06-10-19-32-44.png)
+<!-- $$ q_{des} = [pi/3, 0, pi/3, pi/3, pi/6, 0 , 0]$$ -->
 
 
 
@@ -163,42 +165,43 @@ $$ q_{des} = [pi/3, 0, pi/3, pi/3, pi/6, 0 , 0]$$
 Starting from the initial conditions I compute the following quantities in a for loop over a 10s period with time constant 1ms :
 
 - Error, derivate of the error, integral of the error
-
-$$ err = q_{des} - q $$
+![](./images/2020-06-10-19-32-56.png)
+<!-- $$ err = q_{des} - q $$
 $$ \frac {\partial err}{\partial t} = \frac {\partial (q_{des}-q)}{\partial t}  $$
-$$ \Delta ierr=(err+err_{old})*\delta_{t/2} $$
+$$ \Delta ierr=(err+err_{old})*\delta_{t/2} $$ -->
 
 - Dynamic matrices
 
-$$ F = \text{FrictionTorque}(dq) $$ 
+<!-- $$ F = \text{FrictionTorque}(dq) $$ 
 $$ G = \text{GravityVector(q)} $$
 $$ C = \text{CoriolisVector(q,dq)} $$
-$$ M = \text{MassMatrix(q)} $$
-
+$$ M = \text{MassMatrix(q)} $$ -->
+![](./images/2020-06-10-19-33-07.png)
 
 - Torque, depending on the controller (PD, PD with G compensation, PID)
  
-$$\tau = ( Kv*(derr') + Kp*(err'))'; $$
+<!-- $$\tau = ( Kv*(derr') + Kp*(err'))'; $$
 
 
 <!-- $$ \text{PD Controller with G compensation}$$ -->
-$$ \tau = ( Kv*(derr') + Kp*(err') + G' $$
+<!-- $$ \tau = ( Kv*(derr') + Kp*(err') + G' $$ -->
 
 <!-- $$\text{PID Controller }$$ -->
-$$ \tau = ( Kv*(derr') + Kp*(err')+ Ki*(ierr') + G'$$ 
+<!-- $$ \tau = ( Kv*(derr') + Kp*(err')+ Ki*(ierr') + G'$$  --> 
+![](./images/2020-06-10-19-33-30.png)
 
 And last, accelleration, velocity and displacement resulting from the compute torque applied for a delta t of 1ms.
 
 
-
-$$\ddot q = M^{-1}*(\tau - C- G))$$
+![](./images/2020-06-10-19-33-44.png)
+<!-- $$\ddot q = M^{-1}*(\tau - C- G)$$ -->
 
 Tustin integration:
+![](./images/2020-06-10-19-33-52.png)
 
+<!-- $$\Delta \dot q = (\ddot q_{old} + \ddot q) * \delta_{t} / 2$$
 
-$$\Delta \dot q = (\ddot q_{old} + \ddot q) * \delta_{t} / 2$$
-
-$$\Delta q = (\dot q_{old}+\dot q   ) * \delta_{t} /2$$
+$$\Delta q = (\dot q_{old}+\dot q   ) * \delta_{t} /2$$ -->
 
 
 
@@ -243,19 +246,20 @@ Also we must verify that:
 </p>
 
 This implies that PD control the error converges to 0 if the following hypothesis are true:
-
+<!-- 
  $$ G(qd) = 0 $$
 
- $$  q_d=H(t) \text{ (Heaviside Step function)}$$ 
+ $$  q_d=H(t) \text{ (Heaviside Step function)}$$  -->
 
+![](./images/2020-06-10-19-34-10.png)
 The first hypotesis will be analyzed in the simulation, while the second means that only step reference function can be given as input. This is ideal for pick and place.
 
 I start with the following gains and then proceed to tune them for each specific controller:
 
 
-$$ Kp = diag([30, 30, 30, 30, 30, 30, 30]) $$
-$$ Kv = diag([1, 1, 1, 1, 1, 1, 1]) $$
-
+<!-- $$ Kp = diag([30, 30, 30, 30, 30, 30, 30]) $$
+$$ Kv = diag([1, 1, 1, 1, 1, 1, 1]) $$ -->
+![](./images/2020-06-10-19-34-21.png)
 <!-- <p float="left">
   <img src="./images/PD_control_no_gravity.jpg" width="220" />
   <img src="./images/PD_with_gravity.jpg" width="300" /> 
@@ -285,13 +289,11 @@ It is clear how gravity affects only some joints depending on the configuration 
 ##### Case III: Gravity Compensation
 
 We can solve this by compensating the gravity term with the following law:
-
-$$\tau = Kv*derr + Kp*err + G$$
+![](./images/2020-06-10-19-34-33.png)
+<!-- $$\tau = Kv*derr + Kp*err + G$$ -->
 <p align="center">
 <img src="./images/PD_with_G_compensation.jpg" alt="drawing" class="center" width="800" height="730" />
 </p>
-
-![]()
 
 
 ### Independent PID controller
@@ -312,7 +314,7 @@ oscillations occurring in the output response of the system.
 | PID Without gravity compensation  | PID With gravity compensation  |
 |---|---|
 |The initial offset slowly converges back to the right value (null steady state error). This PID doesn't require any knowledge of the gravity load for the manipulator.| We don't have anymore the big error offset on the second and sixth configuration variable. However it doesn't have the big advantage of the PID (zero knowledge about gravity load ) |
-| ![](2020-06-03-14-31-06.png)  | ![](2020-05-28-18-27-50.png)  |
+| ![](./images/2020-06-03-14-31-06.png)  | ![](./images/2020-05-28-18-27-50.png)  |
 
  
 It is worth mentioning that tuning the PID to achieve stability is much more difficult than tuning just the P and D components.
@@ -342,7 +344,7 @@ Which means that the error dynamics will be:
 
 Essentially, the perfect knowledge of the dynamical model allows for complete linearization and desired pole placement. The trajectory tracking can be solved with arbitrarly fast convergence.
 
-![](2020-05-28-23-56-17.png)
+![](./images/2020-05-28-23-56-17.png)
 
 
 
@@ -350,17 +352,17 @@ Essentially, the perfect knowledge of the dynamical model allows for complete li
 
 When Noise in dynamical parameters knowledge or friction or other sources of error are introduced It is much more difficult to have stability guarantees for the Computed Torque controller. 
 In the following results, it is clear how deeply even a random error $<5\%$ in the mass estimation affects the performances.
-![](2020-06-03-23-25-00.png)
+![](./images/2020-06-03-23-25-00.png)
 
 A more formal and correct approach would be to apply a control law with estimated M, G and C:
-
-$$ \tau=\tilde M(q)\ddot{q_d}+K_v\dot{e}+Kp e+  \tilde C(q, \dot q)\dot q + \tilde G(q) $$
-
+<!-- 
+$$ \tau=\tilde M(q)\ddot{q_d}+K_v\dot{e}+Kp e+  \tilde C(q, \dot q)\dot q + \tilde G(q) $$ -->
+![](./images/2020-06-10-19-35-07.png)
 Substituting the dynamics:
+![](./images/2020-06-10-19-35-30.png)
+<!-- $$ \ddot e +Kv \dot e +Kp e = \eta $$
 
-$$ \ddot e +Kv \dot e +Kp e = \eta $$
-
-$$ \eta = \tilde M ^{-1}(\tilde M(q)\ddot{q_d}+  \tilde C(q, \dot q)\dot q + \tilde G(q)) $$
+$$ \eta = \tilde M ^{-1}(\tilde M(q)\ddot{q_d}+  \tilde C(q, \dot q)\dot q + \tilde G(q)) $$ -->
 
 Where $\eta$ depents non linearly from q.
 
@@ -374,13 +376,13 @@ The Computed Torque method allows desired pole placement and performances, howev
 
 The computer Torque method is only robust up to a certain error margin in the estimation of the dynamical parameters.
 
-![](2020-05-29-00-23-10.png)
+![](./images/2020-05-29-00-23-10.png)
 
 ## Trajectory Tracking
 
 Given a trajectory in the cartesian space, I compute the references in the joint space with the following block:
 
-![](2020-05-28-19-28-23.png)
+![](./images/2020-05-28-19-28-23.png)
 
 I use the non weighted pseudoinverse, therefore the solution will minimize the norm of the q.
 
@@ -467,13 +469,13 @@ The purpose of the backstepping controller is to assume that a controller design
 
 
 I will now investigate what happens if the speed of the reference trajectory is increased. The equation now is:
-
-$$x = x_0 + r * cos(t*6*pi)      $$
+![](./images/2020-06-10-19-35-54.png)
+<!-- $$x = x_0 + r * cos(t*6*pi)      $$
 $$y = y_0                     $$
 $$z = z_0 + r * sin(t*6*pi)      $$
 $$\theta = 0.1*sin(t/3*2*pi)                        $$
 $$\phi = 0                             $$
-$$\psi = 0                             $$
+$$\psi = 0                             $$ -->
 
 Which correpsonds to the following joint trajectory:
 
@@ -485,12 +487,12 @@ Which correpsonds to the following joint trajectory:
 With the computed torque method, it is really simple to find a good set of paramteres to have really good controller performances:
 
 Parameters for CT control:
-$$ Kp = diag([3, 3 ,3 ,3 ,5 ,3 ,30]) $$
-$$ Kv = 1/2 *diag([1 ,1 ,1 ,1 , 7 ,2 ,1]) $$
-
+<!-- $$ Kp = diag([3, 3 ,3 ,3 ,5 ,3 ,30]) $$
+$$ Kv = 1/2 *diag([1 ,1 ,1 ,1 , 7 ,2 ,1]) $$ -->
+![](./images/2020-06-10-19-36-07.png)
 Parameters for Backstepping:
-$$Kp = 1* diag([1 ,1 ,1 ,1 ,3 ,1 ,1])$$
-
+<!-- $$Kp = 1* diag([1 ,1 ,1 ,1 ,3 ,1 ,1])$$ -->
+![](./images/2020-06-10-19-36-31.png)
 | CT results  |  Backstepping results |
 |---|---|
 |  <img src="./images/2020-06-04-00-56-19.png" alt="drawing" class="center" width="370" /> |  <img src="./images/2020-06-04-01-00-38.png" alt="drawing" class="center" width="377" /> |
@@ -553,16 +555,16 @@ In the following section dynamical parameters are randomly increased up to 5%.
 ### Circumference 
 
 
-![](circumference.gif)
+![](./images/circumference.gif)
 
 Desired joint trajectories:
 
-![](2020-05-28-19-41-46.png)
+![](./images/2020-05-28-19-41-46.png)
 
 #### Computed Torque Controller
 
 
-![](2020-06-03-17-53-57.png)
+![](./images/2020-06-03-17-53-57.png)
 
 
 #### Backstepping Controller
@@ -571,19 +573,19 @@ In order to implement the backstepping controller I have to define some other qu
 
 $$\tau = M*ddqr + C*dqr + F + G + Kp*s + err $$
 
-![](2020-06-03-17-51-02.png)
+![](./images/2020-06-03-17-51-02.png)
 
 #### Controller Overview
 
-![](2020-06-03-17-50-01.png)
+![](./images/2020-06-03-17-50-01.png)
 
 ### Helix 
 
-![](helix2.gif)
+![](./images/helix2.gif)
 
 #### Desired Joint Trajectory:
 
-![](2020-06-03-14-44-44.png)
+![](./images/2020-06-03-14-44-44.png)
 
 #### Computed Torque controller
 
@@ -595,12 +597,12 @@ $$\tau = ( M*(ddq_{des} + Kv*derr + Kp*err) + C*dq + F + G )$$
 
 After some gains tuning the following tracking is achieved. The tracking is almost perfect but again, the computed torque method requires complete knowledge of the dynamical system. It is much more interesting to understand what happens when there are dynamical parameters uncertainties.
 
-![](2020-06-03-16-39-35.png)
+![](./images/2020-06-03-16-39-35.png)
 
 #### Backstepping Control
 
-![](2020-06-03-16-44-13.png)
+![](./images/2020-06-03-16-44-13.png)
 
 #### Backstepping vs Computed Torque
 
-![](2020-06-03-16-46-33.png)
+![](./images/2020-06-03-16-46-33.png)
