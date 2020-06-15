@@ -8,7 +8,7 @@
   - [Inverse spherical anolonome pendulum](#inverse-spherical-anolonome-pendulum)
     - [Non Minimal state representation](#non-minimal-state-representation)
     - [Minimal State representation](#minimal-state-representation)
-    - [No slip condition and non holonomic constraints](#no-slip-condition-and-non-holonomic-constraints)
+    - [No slip condition and Non holonomic constraints](#no-slip-condition-and-non-holonomic-constraints)
     - [Parameters](#parameters)
     - [Direct Kinematics](#direct-kinematics)
     - [Kinetic Energy](#kinetic-energy)
@@ -25,8 +25,8 @@
 
 
 <p align="center">
-  <!-- <img align="Center" src="2020-06-04-01-14-39.png" alt="drawing" class="center" width="250" /> -->
-  <img align="Center" src="2020-06-04-12-17-37.png" alt="drawing" class="center" width="500" />
+  <!-- <img align="Center" src="images/2020-06-04-01-14-39.png" alt="drawing" class="center" width="250" /> -->
+  <img align="Center" src="images/2020-06-04-12-17-37.png" alt="drawing" class="center" width="500" />
     <figcaption  align="Center"> Fig.1 - Anolonome Spherical Inverted pendulum.</figcaption>
 
 </p>
@@ -91,7 +91,7 @@ $$q(t)=\left\{\theta_r(t),\theta_l(t),\psi (t),\phi (t)\right\}$$
 $$\dot q(t)=\{\dot{\theta_r}(t),\dot{\theta}_{l}(t),\dot{\psi}(t),\dot{\phi}(t)\}$$
 
 
-### No slip condition and non holonomic constraints
+### No slip condition and Non holonomic constraints
 
  Without explicitly modelling the constraints, I can choose a set of independent variables with the embedded constraints (rolling without slipping for the two wheels in my case). This results in $x,y$ and $\theta$ being excluded from the state and only related to $\theta_r, \theta_l$ with the following relationship:
 
@@ -242,16 +242,16 @@ In this case I tried to simulate the system starting near the upright position, 
 
 The controllability of the non linear system can be analyzed starting from the Chow's theorem, that states: A system is small time locally accessile in $x_0 \in \mathbb{R} ^n$ if, given the system 
 
-<p align="center"><img align="Center" src="2020-06-04-15-48-59.png" alt="drawing" class="center" width="300"/></p>
+<p align="center"><img align="Center" src="images/2020-06-04-15-48-59.png" alt="drawing" class="center" width="300"/></p>
 
 and the distributions: 
 
-<p align="center"><img align="Center" src="2020-06-04-11-51-21.png" alt="drawing" class="center" width="190"/></p>
+<p align="center"><img align="Center" src="images/2020-06-04-11-51-21.png" alt="drawing" class="center" width="190"/></p>
 
 the smallest $\Delta$-invariant containing+ $\Delta_0$, which is $< \Delta | \Delta_0>$, has dimensions $n$ in $x_0$.
 The dimensions of  $< \Delta | \Delta_0>$ can be computed using the filtration procedure, for which the following quantity must be computed iteratively:
 
-<p align="center"><img align="Center" src="2020-06-04-15-49-28.png" alt="drawing" class="center" width="230"/></p>
+<p align="center"><img align="Center" src="images/2020-06-04-15-49-28.png" alt="drawing" class="center" width="230"/></p>
 
 dove $[\Delta_i, \Delta]$ rappresenta la Lie-bracket tra i campi vettoriali delle due distribuzioni. La procedura viene fermata quando $i=n$ o quando si trova un valore $k$ tale per cui le distribuzioni $\Delta_k$ e $\Delta_{k+1}$ sono non-singolari nel punto di interesse $x_0$ e $\dim \Delta_k(x_0) = \dim \Delta_{k+1}(x_0)$.
 Dalla procedura di filtrazione applicata al sistema in esame si ottiene che la massima dimensione di $\Delta_k$ è 5, per cui il sistema in fase di volo non è \textit{small-time locally accessible}, e quindi neanche controllabile, per nessun valore di $x_0$. Questo risultato coincide con quanto ci si può intuitivamente aspettare, in quanto il sistema è in caduta libera e non si ha la possibilità di applicare forze esterne per controllarne la posizione).\\
@@ -270,19 +270,19 @@ The standart theory for MIMO feedback linearization for a non linear square syst
 Given the system:
 
 
-<p align="center"><img align="Center" src="2020-06-04-11-51-21.png" alt="drawing" class="center" width="200"/></p>
-<p align="center"><img align="Center" src="2020-06-04-11-51-42.png" alt="drawing" class="center" width="500"/></p>
-<p align="center"><img align="Center" src="2020-06-04-11-51-50.png" alt="drawing" class="center" width="500"/></p>
-<p align="center"><img align="Center" src="2020-06-04-11-51-58.png" alt="drawing" class="center" width="150"/></p>
-<p align="center"><img align="Center" src="2020-06-04-11-52-03.png" alt="drawing" class="center" width="200"/></p>
-<p align="center"><img align="Center" src="2020-06-04-11-52-10.png" alt="drawing" class="center" width="180"/></p>
-<p align="center"><img align="Center" src="2020-06-04-11-52-17.png" alt="drawing" class="center" width="130"/></p>
-<p align="center"><img align="Center" src="2020-06-04-11-52-26.png" alt="drawing" class="center" width="400"/></p>
-<p align="center"><img align="Center" src="2020-06-04-11-52-35.png" alt="drawing" class="center" width="170"/></p>
-<p align="center"><img align="Center" src="2020-06-04-11-52-42.png" alt="drawing" class="center" width="150"/></p>
-<p align="center"><img align="Center" src="2020-06-04-11-52-48.png" alt="drawing" class="center" width="400"/></p>
-<p align="center"><img align="Center" src="2020-06-04-11-52-54.png" alt="drawing" class="center" width="350"/></p>
-<p align="center"><img align="Center" src="2020-06-04-11-52-59.png" alt="drawing" class="center" width="300"/></p>
+<p align="center"><img align="Center" src="images/2020-06-04-11-51-21.png" alt="drawing" class="center" width="200"/></p>
+<p align="center"><img align="Center" src="images/2020-06-04-11-51-42.png" alt="drawing" class="center" width="500"/></p>
+<p align="center"><img align="Center" src="images/2020-06-04-11-51-50.png" alt="drawing" class="center" width="500"/></p>
+<p align="center"><img align="Center" src="images/2020-06-04-11-51-58.png" alt="drawing" class="center" width="150"/></p>
+<p align="center"><img align="Center" src="images/2020-06-04-11-52-03.png" alt="drawing" class="center" width="200"/></p>
+<p align="center"><img align="Center" src="images/2020-06-04-11-52-10.png" alt="drawing" class="center" width="180"/></p>
+<p align="center"><img align="Center" src="images/2020-06-04-11-52-17.png" alt="drawing" class="center" width="130"/></p>
+<p align="center"><img align="Center" src="images/2020-06-04-11-52-26.png" alt="drawing" class="center" width="400"/></p>
+<p align="center"><img align="Center" src="images/2020-06-04-11-52-35.png" alt="drawing" class="center" width="170"/></p>
+<p align="center"><img align="Center" src="images/2020-06-04-11-52-42.png" alt="drawing" class="center" width="150"/></p>
+<p align="center"><img align="Center" src="images/2020-06-04-11-52-48.png" alt="drawing" class="center" width="400"/></p>
+<p align="center"><img align="Center" src="images/2020-06-04-11-52-54.png" alt="drawing" class="center" width="350"/></p>
+<p align="center"><img align="Center" src="images/2020-06-04-11-52-59.png" alt="drawing" class="center" width="300"/></p>
 
 
 In this case the two outputs chosen for feedback linearization are the two angles: $\phi$ and $\psi$.

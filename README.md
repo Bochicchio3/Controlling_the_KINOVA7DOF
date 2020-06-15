@@ -11,6 +11,7 @@
     - [Overview of the Implemented Controllers](#overview-of-the-implemented-controllers)
       - [Non adaptive](#non-adaptive)
       - [Adaptive Methods](#adaptive-methods)
+    - [Code Structure](#code-structure)
     - [Reference Trajectories](#reference-trajectories)
     - [Pick and Place](#pick-and-place)
       - [Trajectory definition](#trajectory-definition)
@@ -40,9 +41,7 @@
       - [Backstepping vs Computed Torque](#backstepping-vs-computed-torque)
 
 
-
 ## Appendix A with results plot at full size
-
 
   - [Circumference](#circumference)
     - [Computed Torque Controller](#computed-torque-controller)
@@ -133,6 +132,30 @@ Once we have the dynamical model properly set up, we can proceed to implement th
 | Adaptive Backstepping    | :x:                | :heavy_check_mark: | :heavy_check_mark: |
 | Li Slotine               |:x: | :heavy_check_mark: |  :heavy_check_mark: |
 
+
+### Code Structure
+
+Before I dive into the report, I would line to outline the code structure. In the repository, there are essentially three folders. 
+- Pick and place: It contains every result for the pick and place simulation. Every controller will be found in 
+```
+./pick_and_place_results/pickandplace_ (desired controller).m
+```
+like: 
+```
+./pick_and_place_results/pickandplace_computedtorque.m
+```
+Most of the results are already stored as (desired controller)_results.mat
+
+Comparative plots for the pick and place scenario can be found in 
+
+```
+./pick_and_place_results/plot_results.m
+```
+
+- Non adaptive control
+
+
+- Adaptive control
 
 ### Reference Trajectories
 
@@ -516,9 +539,14 @@ end
 
 In the following section dynamical parameters are randomly increased up to 5%.
 
-
-
 ### Dynamic Regressor
+
+The regressor has been computed in Wolfram Mathematica 12, using the Screw Calclus Package. 
+The computation of the regressor for the Kinova 7DOF manipulator revealed to be too expensive, therefore I proceeded to compute the regressor for a simplyfied version of the robot (removing the last two links). The computation for the 5 DOF arm infact was the limit in terms of the sheer size of the output that mathematica could handle.
+
+From now on I will refer to this simplyfied model.
+
+
 
 
 
