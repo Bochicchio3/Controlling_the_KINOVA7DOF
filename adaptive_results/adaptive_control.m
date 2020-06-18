@@ -297,18 +297,20 @@ q0 = [0 pi/2 pi/2 pi/2 0 ]+[0 pi/2 pi/2 pi/2 0 ]*0.01;
 q(1,:) = q0; 
 q_dot(1,:) = q_dot0; 
 
-qr_dot = zeros(length(t),n); 
+qr_dot = zeros(length(t),n); 1
 qr_ddot = zeros(length(t),n); 
 
 
 pi0 = zeros(1,n*10); 
 for j = 1:n
+    
     pi0((j-1)*10+1:j*10) = [KUKAmodel.links(j).m KUKAmodel.links(j).m*KUKAmodel.links(j).r ...
         KUKAmodel.links(j).I(1,1) 0 0 KUKAmodel.links(j).I(2,2) 0 KUKAmodel.links(j).I(3,3)];
+    
 end
 piArray(1,:) = pi0; 
 
-%%  P e R fanno parte della candidata di Lyapunov, quindi devono essere definite positive
+%%  
 
  
 Kp = 1*diag([1 1 1 1 1]);
@@ -316,15 +318,13 @@ Kv = 0.01*diag([30 30 30 10 5]);
 Kd = 0.01*diag([30 30 30 10 5]);
 
 R = diag(repmat([1e1 repmat(1e3,1,3) 1e2 1e7 1e7 1e2 1e7 1e2],1,n)); 
-
 P = 0.001*eye(10);
-
 lambda = diag([5, 5, 5, 5, 5]);
 
 qd_dot=dq_des';
 qd_ddot=ddq_des';
 qd=q_des';
-
+t
 tic
 for i = 2:length(t)
 
@@ -350,7 +350,10 @@ for i = 2:length(t)
     Ctilde = KUKAmodel.coriolis(q(i-1,:),q_dot(i-1,:)); 
     Gtilde = KUKAmodel.gravload(q(i-1,:)); 
 
-    tau(i,:) = qd_ddot(i-1,:)*Mtilde' + q_dot(i-1,:)*Ctilde' + Gtilde + e_dot*Kv' + e*Kp';
+    tau(i,:) = qd_ddot(i-1,:)*Mtilde' + q_dot(i-1,:)*Ctilde'...
+        + Gtilde + e_dot*Kv' + e*Kp';
+    
+    
 %     tau(i,:) = qd_ddot(i-1,:)*M' + q_dot(i-1,:)*C' + G + e_dot*Kv' + e*Kp';
 % switch sel2
 %     case 1
@@ -358,8 +361,15 @@ for i = 2:length(t)
 %     case 2
 %         tau(i,:) = qd_ddot(i-1,:)*Mtilde' + q_dot(i-1,:)*Ctilde' + Gtilde + e_dot*Kv' + e*Kp';
 %     case 3
-%         tau(i,:) = qr_ddot(i-1,:)*Mtilde' + qr_dot(i-1,:)*Ctilde' + Gtilde + s*Kd'; 
+
+
+        tau(i,:) = qr_ddot(i-1,:)*Mtilde'...
+            + qr_dot(i-1,:)*Ctilde' + Gtilde + s*Kd'; 
+
+
 %     case 4
+
+
 %         tau(i,:) = qr_ddot(i-1,:)*Mtilde' + qr_dot(i-1,:)*Ctilde' + Gtilde + s*Kd' + e*Kp'; 
 % end
     
@@ -376,14 +386,23 @@ for i = 2:length(t)
     
     q1 = q(i,1); q2 = q(i,2); q3 = q(i,3); q4 = q(i,4); q5 = q(i,5);
 
-    q1_dot = q_dot(i,1); q2_dot = q_dot(i,2); q3_dot = q_dot(i,3); 
-    q4_dot = q_dot(i,4); q5_dot = q_dot(i,5);
+    q1_dot = q_dot(i,1);
+    q2_dot = q_dot(i,2);
+    q3_dot = q_dot(i,3); 
+    q4_dot = q_dot(i,4);
+    q5_dot = q_dot(i,5);
 
-    qd1_dot = qd_dot(i,1); qd2_dot = qd_dot(i,2); qd3_dot = qd_dot(i,3);
-    qd4_dot = qd_dot(i,4); qd5_dot = qd_dot(i,5);
+    qd1_dot = qd_dot(i,1);
+    qd2_dot = qd_dot(i,2);
+    qd3_dot = qd_dot(i,3);
+    qd4_dot = qd_dot(i,4);
+    qd5_dot = qd_dot(i,5);
 
-    qd1_ddot = qd_ddot(i,1); qd2_ddot = qd_ddot(i,2); qd3_ddot = qd_ddot(i,3); 
-    qd4_ddot = qd_ddot(i,4); qd5_ddot = qd_ddot(i,5);
+    qd1_ddot = qd_ddot(i,1);
+    qd2_ddot = qd_ddot(i,2);
+    qd3_ddot = qd_ddot(i,3);
+    qd4_ddot = qd_ddot(i,4);
+    qd5_ddot = qd_ddot(i,5);
 
     g = 9.81;
 
@@ -394,11 +413,13 @@ for i = 2:length(t)
     piArray(i,:) = piArray(i-1,:) + delta_t*piArray_dot; 
 
 %     
-%     if sel2==3
-%         piArray_dot = (R^(-1) * Y' * s')';  
-%         
-%         piArray(i,:) = piArray(i-1,:) + delta_t*piArray_dot; 
-%     end
+    if sel2==3
+        
+        piArray_dot = (R^(-1) * Y' * s')';  
+        
+        piArray(i,:) = piArray(i-1,:) + delta_t*piArray_dot; 
+        
+    end
 
     if mod(i,100) == 0
         

@@ -90,8 +90,8 @@ for j=1:num_of_joints
     plot(t(1:5000),result(1:5000,j))
     hold on
     plot (t(1:5000),refjoint(j,1:5000))
-    hold on
-    plot (t(1:5000),results_with_correct_mass(1:5000,j))
+%     hold on
+%     plot (t(1:5000),results_with_correct_mass(1:5000,j))
     xlabel('time [s]');
     ylabeltext = sprintf('_%i [rad]',j);
     ylabel(['Joint position' ylabeltext]);

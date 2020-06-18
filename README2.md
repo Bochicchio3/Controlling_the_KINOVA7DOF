@@ -5,6 +5,7 @@
 
 - [The 7 DOF Franka Emika Panda robot](#the-7-dof-franka-emika-panda-robot)
   - [Table of Content](#table-of-content)
+  - [Appendix A with results plot at full size](#appendix-a-with-results-plot-at-full-size)
   - [The robotic arm](#the-robotic-arm)
     - [Robot modelling](#robot-modelling)
     - [Overview of the Implemented Controllers](#overview-of-the-implemented-controllers)
@@ -20,8 +21,6 @@
         - [Case II: Robot gravity is no longer ignored](#case-ii-robot-gravity-is-no-longer-ignored)
         - [Case III: Gravity Compensation](#case-iii-gravity-compensation)
     - [Independent PID controller](#independent-pid-controller)
-      - [PID Without gravity compensation](#pid-without-gravity-compensation)
-      - [PID With gravity compensation](#pid-with-gravity-compensation)
     - [Computed Torque](#computed-torque)
     - [Computed torque Robustness and errors in the dynamical model](#computed-torque-robustness-and-errors-in-the-dynamical-model)
     - [Pick and Place Results Overview](#pick-and-place-results-overview)
@@ -30,9 +29,7 @@
       - [Response to different trajectories speed and amplitude](#response-to-different-trajectories-speed-and-amplitude)
   - [Perturbations of Dynamical parameters and Adaptive strategies](#perturbations-of-dynamical-parameters-and-adaptive-strategies)
     - [Dynamic Regressor](#dynamic-regressor)
-    - [Adaptive Computed Torque](#adaptive-computed-torque)
-    - [Li Slotine](#li-slotine)
-    - [Adaptive Backstepping Control](#adaptive-backstepping-control)
+- [Appendix: Full scale Images for circumference Tracking](#appendix-full-scale-images-for-circumference-tracking)
     - [Circumference](#circumference)
       - [Computed Torque Controller](#computed-torque-controller)
       - [Backstepping Controller](#backstepping-controller)
@@ -43,7 +40,8 @@
       - [Backstepping Control](#backstepping-control)
       - [Backstepping vs Computed Torque](#backstepping-vs-computed-torque)
 
-<!-- ## Appendix A with results plot at full size
+
+## Appendix A with results plot at full size
 
   - [Circumference](#circumference)
     - [Computed Torque Controller](#computed-torque-controller)
@@ -54,7 +52,7 @@
     - [Computed Torque controller](#computed-torque-controller-1)
     - [Backstepping Control](#backstepping-control)
     - [Backstepping vs Computed Torque](#backstepping-vs-computed-torque)
-  -->
+ 
 ## The robotic arm
 
 This  7 DOF Franka Emika Panda robot is  equipped  with 7 revolute joints, each mounting a torque sensor, and it has a total weight of approximately 18kg, having the possibility to handle payloads up to 3kg.
@@ -154,40 +152,10 @@ Comparative plots for the pick and place scenario can be found in
 ./pick_and_place_results/plot_results.m
 ```
 
-
 - Non adaptive control
-
-All the results are found in:
-
-```
-./non_adaptive_results/non_adaptive_trajectory_tracking.m
-```
-
-In the file, the following sections are found:
-
-1. Choose Trajectory (Helix or Circumference)
-2. Setup
-3. Compute Reference Trajectory (Cartesian to joint space)
-4. Execute the computed trajectory with the robot
-5. Trajectory Tracking: Computed Torque Method
-6. Computed Torque Results
-7. Trajectory Tracking: Backstepping Method
-8. Backstepping Results
-9. Comparison
 
 
 - Adaptive control
-  
-All the results are found in:
-
-```
-./adaptive_results/adaptive_trajectory_tracking.m
-```
-
-In this file, another manipulator was chosen, as I encountered difficulties in the computation of the dynamic regressor for the Franka 7 DOF arm (and even for a 5 dof simplyfied version of it).
-Therefore, I switched to the arm implemented in the robotics toolbox, the KUKA 5 DOF robot.
-
-This file has a similar structure: in the first section the trajectory is computed, then the Computed Torque and Backstepping controller are calculated exactly as before. At the end, the mass of the model is modified and the Adaptive Controllers are implemented.
 
 ### Reference Trajectories
 
@@ -366,24 +334,18 @@ oscillations occurring in the output response of the system.
 <img src="./images/2020-06-03-18-11-23.png" alt="drawing" class="center" width="500" />
 </p>
 
-#### PID Without gravity compensation  
-
-The initial offset slowly converges back to the right value (null steady state error). This PID doesn't require any knowledge of the gravity load for the manipulator.
-![](./images/2020-06-03-14-31-06.png) 
+| PID Without gravity compensation  | PID With gravity compensation  |
+|---|---|
+|The initial offset slowly converges back to the right value (null steady state error). This PID doesn't require any knowledge of the gravity load for the manipulator.| We don't have anymore the big error offset on the second and sixth configuration variable. However it doesn't have the big advantage of the PID (zero knowledge about gravity load ) |
+| ![](./images/2020-06-03-14-31-06.png)  | ![](./images/2020-05-28-18-27-50.png)  |
 
  
 It is worth mentioning that tuning the PID to achieve stability is much more difficult than tuning just the P and D components.
 
-
-#### PID With gravity compensation 
-
-We don't have anymore the big error offset on the second and sixth configuration variable. However it doesn't have the big advantage of the PID (zero knowledge about gravity load )
-
-![](./images/2020-05-28-18-27-50.png)
-
-
 ### Computed Torque
-
+<p align="center">
+<img src="./images/2020-06-03-12-03-58.png" alt="drawing" class="center" width="400" />
+</p>
 
 
 In order to achieve perfect reference tracking, the system should have an in built inner dynamical model that can be used to compute a feedforward action that complements the feedback action seen previously. A control that does this is the following:
@@ -425,11 +387,11 @@ Substituting the dynamics:
 
 $$ \eta = \tilde M ^{-1}(\tilde M(q)\ddot{q_d}+  \tilde C(q, \dot q)\dot q + \tilde G(q)) $$ -->
 
-Where $\eta$ depends non linearly from q.
+Where $\eta$ depents non linearly from q.
 
 ### Pick and Place Results Overview
 
-The image shows the PD, compensated PD, PID, Computed Torque, and reference signals for the pick and place task.
+The PD surely is the easiest control, but suffers severe limits in terms of both hypotesis and performances. Gravity needs to be compensated to allow it converges to the desired value.
 
 The integral component can compensate for some of the limits of the PD independent controller, however it was extremely difficult to achieve a good tuning.
 
@@ -437,7 +399,7 @@ The Computed Torque method allows desired pole placement and performances, howev
 
 The computer Torque method is only robust up to a certain error margin in the estimation of the dynamical parameters.
 
-![](./images/2020-06-17-19-22-13.png)
+![](./images/2020-05-29-00-23-10.png)
 
 ## Trajectory Tracking
 
@@ -449,70 +411,14 @@ I use the non weighted pseudoinverse, therefore the solution will minimize the n
 
 Now I will proceed to define the used trajectories and the results for each controller.
 
-- Trajectory tracking I: Circumference       
-<p align="center">
-  <img align="Center" src="./images/2020-06-03-17-55-13.png" alt="drawing" class="center" width="350" />
-</p> 
-Trajectory Visualization
-</p>   
-
-<p align="center">
-<img align="Center" src="./images/circumference.gif" alt="drawing" class="center" width="950" />
-</p>  
-Desired Joint Trajectories
-</p> 
-  <img align="Center" src="./images/2020-05-28-19-41-46.png" alt="drawing" class="center" width="850" />
-</p>   
-Computed Torque Controller  
-<p align="center">
-  <img align="Center" src="./images/2020-06-03-17-53-57.png" alt="drawing" class="center" width="850" />
-</p>   
-Backstepping Controller
-<p align="center">
-  <img align="Center" src="./images/2020-06-03-17-51-02.png" alt="drawing" class="center" width="850" />
-</p>   
-Performance comparison between CT and BS
-<p align="center">
-  <img align="Center" src="./images/2020-06-03-17-50-01.png" alt="drawing" class="center" width="850" />
-</p>   
-
-
-
- - Trajectory Trackin II: Helix        
-  
-<p align="center">
-  <img align="Center" src="./images/2020-06-03-17-55-25.png" alt="drawing" class="center" width="350" />
-</p> 
-Trajectory Visualization
-</p>   
-
-<p align="center">
-<img align="Center" src="./images/helix2.gif" alt="drawing" class="center" width="950" />
-</p>  
-Desired Joint Trajectories
-</p> 
-  <img align="Center" src="./images/2020-06-03-14-44-44.png" alt="drawing" class="center" width="850" />
-</p>   
-Computed Torque Controller  
-<p align="center">
-  <img align="Center" src="./images/2020-06-03-16-39-35.png" alt="drawing" class="center" width="850" />
-</p>   
-Backstepping Controller
-<p align="center">
-  <img align="Center" src="./images/2020-06-03-16-44-13.png" alt="drawing" class="center" width="850" />
-</p>   
-Performance comparison between CT and BS
-<p align="center">
-  <img align="Center" src="./images/2020-06-03-16-46-33.png" alt="drawing" class="center" width="850" />
-</p>   
-                                                                                       |
- <!-- --------------------------------------------------------------------------------------------------- |
- <img src="./images/2020-06-03-17-55-25.png" width="380" />                                          |
- <img src="./images/helix2.gif" width="400" />                                                       |
- Desired Helix Joint Trajectories<img src="./images/2020-06-03-14-44-44.png" width="400" />          |
- Computed Torque Controller  <img src="./images/2020-06-03-16-39-35.png" width="400" />              |
- Backstepping Controller<img src="./images/2020-06-03-16-44-13.png" width="400" />                   |
- Performance comparison between CT and BS <img src="./images/2020-06-03-16-46-33.png" width="350" /> | -->
+| Circumference  | Helix  |
+|---|---|
+| <img src="./images/2020-06-03-17-55-13.png" width="300" />  |<img src="./images/2020-06-03-17-55-25.png" width="380" />   |
+| <img src="./images/circumference.gif" width="400" />  |   <img src="./images/helix2.gif" width="400" />   |
+| Desired Circumference Joint Trajectories <img src="./images/2020-05-28-19-41-46.png" width="400" />  |  Desired Helix Joint Trajectories<img src="./images/2020-06-03-14-44-44.png" width="400" />  |
+|Computed Torque Controller   <img src="./images/2020-06-03-17-53-57.png" width="400" height ="320" />  | Computed Torque Controller  <img src="./images/2020-06-03-16-39-35.png" width="400" />  |
+| Backstepping Controller<img src="./images/2020-06-03-17-51-02.png" width="400" />   |  Backstepping Controller<img src="./images/2020-06-03-16-44-13.png" width="400" />  |
+|  Performance comparison between CT and BS <img src="./images/2020-06-03-17-50-01.png" height ="275" width="400" />  |  Performance comparison between CT and BS <img src="./images/2020-06-03-16-46-33.png" width="350" />  |
 
 
 
@@ -543,22 +449,17 @@ $$\psi =    0;                           $$ -->
 
 #### The Backstepping Control
 
-
-![](./images/2020-06-17-21-00-07.png)
-
-![](./images/2020-06-17-21-02-06.png)
-<!-- The backstepping control can be used when system dynamics can be partitioned such that: 
+The backstepping control can be used when system dynamics can be partitioned such that: 
 
 <p align="center">
 <img src="./images/2020-06-04-09-05-59.png" alt="drawing" class="center" width="310" />
 </p>
 
 
-The backstepping method assumes that a controller design exist for the higher level system, which means that a feedback law exist for $\xi_2$ such that a Lyapunov function for $\xi_1$ is negative semi-definite.
+The purpose of the backstepping controller is to assume that a controller design exist for the higher level system, which means that a feedback law exist for $\xi_2$ such that a Lyapunov function for $\xi_1$ is negative semi-definite.
 <p align="center">
 <img src="./images/2020-06-04-09-11-22.png" alt="drawing" class="center" width="190" />
 </p>
-In the backstepping method the control is computed so that the state $\xi_2$ tends to track the value of u'. This can be optained using the Lyapunov function: 
 
 <p align="center">
 <img src="./images/2020-06-04-09-11-30.png" alt="drawing" class="center" width="310" />
@@ -584,7 +485,7 @@ In the backstepping method the control is computed so that the state $\xi_2$ ten
 <p align="center">
 <img src="./images/2020-06-04-09-12-18.png" alt="drawing" class="center" width="350" />
 </p>
- -->
+
 
 
 #### Response to different trajectories speed and amplitude
@@ -612,13 +513,12 @@ Parameters for CT control:
 <!-- $$ Kp = diag([3, 3 ,3 ,3 ,5 ,3 ,30]) $$
 $$ Kv = 1/2 *diag([1 ,1 ,1 ,1 , 7 ,2 ,1]) $$ -->
 ![](./images/2020-06-10-19-36-07.png)
-
- <img src="./images/2020-06-04-00-56-19.png" alt="drawing" class="center" width="670" /> 
 Parameters for Backstepping:
 <!-- $$Kp = 1* diag([1 ,1 ,1 ,1 ,3 ,1 ,1])$$ -->
 ![](./images/2020-06-10-19-36-31.png)
-
- <img src="./images/2020-06-04-01-00-38.png" alt="drawing" class="center" width="677" /> |
+| CT results  |  Backstepping results |
+|---|---|
+|  <img src="./images/2020-06-04-00-56-19.png" alt="drawing" class="center" width="370" /> |  <img src="./images/2020-06-04-01-00-38.png" alt="drawing" class="center" width="377" /> |
 
 
 
@@ -633,197 +533,23 @@ What happens if dynamical parameters estimation is biased?
 
 ```
 for j = 1:num_of_joints % for each joint/link
-    KUKAmodel.links(j).m = KUKAmodel.links(j).m .* (1+randi(5,1)/100); %masse [1x1]
+    PANDAmodel.links(j).m = PANDAmodel.links(j).m .* (1+randi(5,1)/100); %masse [1x1]
 end
 ```
 
-In the following section dynamical parameters are increased up to 2.5%.
+In the following section dynamical parameters are randomly increased up to 5%.
 
 ### Dynamic Regressor
-
-<!-- $$\text{The dynamic regressor is a matrix function employed to write the dynamics linearly in the inertial parameters:}$$ -->
-![](2020-06-18-18-08-37.png)
-<p align="center">
-<!-- <img src="./images/faster_trajectory.gif" alt="drawing" class="center" width="410" /> -->
-<img src="./images/2020-06-18-10-04-21.png" alt="drawing" class="center" width="433" />
-</p>
-
-
-
-<p align="center">
-<!-- <img src="./images/faster_trajectory.gif" alt="drawing" class="center" width="410" /> -->
-<img src="./images/2020-06-18-10-14-37.png" alt="drawing" class="center" width="933" />
-</p>
-
-The Dynamic regressor an be computed in closed form from the Lagrangian formulation.\\
-The lagrangian of a serial chain is defined as: 
-
-
-<p align="center">
-<!-- <img src="./images/faster_trajectory.gif" alt="drawing" class="center" width="410" /> -->
-<img src="./images/2020-06-18-11-21-17.png" alt="drawing" class="center" width="533" />
-</p>
-
-
-The equations of motion will be:
-
-<p align="center">
-<!-- <img src="./images/faster_trajectory.gif" alt="drawing" class="center" width="410" /> -->
-<img src="./images/2020-06-18-11-21-46.png" alt="drawing" class="center" width="433" />
-</p>
-
-
-Reformulating the dynamics with the regressor gives:
-
-<p align="center">
-<!-- <img src="./images/faster_trajectory.gif" alt="drawing" class="center" width="410" /> -->
-<img src="./images/2020-06-18-11-22-28.png" alt="drawing" class="center" width="433" />
-</p>
-
-
-Rerranging the terms:
-
-<p align="center">
-<!-- <img src="./images/faster_trajectory.gif" alt="drawing" class="center" width="410" /> -->
-<img src="./images/2020-06-18-11-23-22.png" alt="drawing" class="center" width="433" />
-</p>
-
 
 The regressor has been computed in Wolfram Mathematica 12, using the Screw Calclus Package. 
 The computation of the regressor for the Kinova 7DOF manipulator revealed to be too expensive, therefore I proceeded to compute the regressor for a simplyfied version of the robot (removing the last two links). The computation for the 5 DOF arm infact was the limit in terms of the sheer size of the output that mathematica could handle.
 
 From now on I will refer to this simplyfied model.
 
-### Adaptive Computed Torque
-
-If there is parameters uncertainties, the torque will be:
-
-<p align="center">
-<!-- <img src="./images/faster_trajectory.gif" alt="drawing" class="center" width="410" /> -->
-<img src="./images/2020-06-18-11-26-41.png" alt="drawing" class="center" width="433" />
-</p>
-
-Where the dynamic matrices represented above are the estimates based on the uncertainties in the dynamical system.
-Substituting the torque in the dynamics gives:
-
-<p align="center">
-<!-- <img src="./images/faster_trajectory.gif" alt="drawing" class="center" width="410" /> -->
-<img src="./images/2020-06-18-11-28-00.png" alt="drawing" class="center" width="650" />
-</p>
-
-
-The estimated M  matrix is considered inverible.
-As anticipated in the traditional computed torque section, the error dynamics is:
-
-<p align="center">
-<!-- <img src="./images/faster_trajectory.gif" alt="drawing" class="center" width="410" /> -->
-<img src="./images/2020-06-10-19-35-30.png" alt="drawing" class="center" width="1000" />
-</p>
-
-
-A proper dynamic of the dynamical estimation parameters must be chosen in order to grant the convergence to zero.
-If we write the error dynamics in normal form:
-
-<p align="center">
-<!-- <img src="./images/faster_trajectory.gif" alt="drawing" class="center" width="410" /> -->
-<img src="./images/2020-06-18-11-32-28.png" alt="drawing" class="center" width="650" />
-</p>
-
-
-and the Lyapunov Function will be:
-
-<p align="center">
-<!-- <img src="./images/faster_trajectory.gif" alt="drawing" class="center" width="410" /> -->
-<img src="./images/2020-06-18-11-32-52.png" alt="drawing" class="center" width="533" />
-</p>
-
-
-The derivative of the Lyapunov function will be: 
-
-<p align="center">
-<!-- <img src="./images/faster_trajectory.gif" alt="drawing" class="center" width="410" /> -->
-<img src="./images/2020-06-18-11-33-19.png" alt="drawing" class="center" width="533" />
-</p>
-
-and the dynamics of the parameters that makes it n.d is:
-
-<p align="center">
-<!-- <img src="./images/faster_trajectory.gif" alt="drawing" class="center" width="410" /> -->
-<img src="./images/2020-06-18-11-33-50.png" alt="drawing" class="center" width="633" />
-</p>
-
-The convergence of the error dynamics is not guaranteed unless the Persistent Excitation condition is met:
-
-<p align="center">
-<!-- <img src="./images/faster_trajectory.gif" alt="drawing" class="center" width="410" /> -->
-<img src="./images/2020-06-18-11-35-55.png" alt="drawing" class="center" width="633" />
-</p>
-
-In this case: 
-
-<p align="center">
-<!-- <img src="./images/faster_trajectory.gif" alt="drawing" class="center" width="410" /> -->
-<img src="./images/2020-06-18-11-36-39.png" alt="drawing" class="center" width="683" />
-</p>
-
-
-The problems for this control are the invertibility of the estimated Mass matrix and the need for joint accelleration measurements.
 
 
 
-### Li Slotine
 
-The Li Slotine control uses the reference velocity:
-
-<p align="center">
-<!-- <img src="./images/faster_trajectory.gif" alt="drawing" class="center" width="410" /> -->
-<img src="./images/2020-06-04-00-46-36.png" alt="drawing" class="center" width="433" />
-</p>
-![](2020-06-18-11-46-02.png)
-
-where:
-
-<p align="center">
-<!-- <img src="./images/faster_trajectory.gif" alt="drawing" class="center" width="410" /> -->
-<img src="./images/2020-06-04-00-46-36.png" alt="drawing" class="center" width="433" />
-</p>
-![](2020-06-18-11-46-17.png)
-
-The control torque is:
-
-<p align="center">
-<!-- <img src="./images/faster_trajectory.gif" alt="drawing" class="center" width="410" /> -->
-<img src="./images/2020-06-04-00-46-36.png" alt="drawing" class="center" width="433" />
-</p>
-![](2020-06-18-11-46-47.png)
-
-Deriving the Lyapunov Function:
-
-<p align="center">
-<!-- <img src="./images/faster_trajectory.gif" alt="drawing" class="center" width="410" /> -->
-<img src="./images/2020-06-04-00-46-36.png" alt="drawing" class="center" width="433" />
-</p>
-![](2020-06-18-11-47-05.png) 
-and substituting the torque we have:
-
-<p align="center">
-<!-- <img src="./images/faster_trajectory.gif" alt="drawing" class="center" width="410" /> -->
-<img src="./images/2020-06-04-00-46-36.png" alt="drawing" class="center" width="433" />
-</p>
-![](2020-06-18-11-47-24.png)
-
-Choosing the following dynamics for the dynamical paremeters estimation:
-
-![](2020-06-18-11-47-50.png)
-
-A s.n.d derivative is obtained:
-
-![](2020-06-18-11-48-09.png)
-
-Using the Barbalat Lemma the asymptotic stability is achieved.
-
-
-### Adaptive Backstepping Control
 
 
 
@@ -851,7 +577,7 @@ Using the Barbalat Lemma the asymptotic stability is achieved.
 
 
 
-<!-- # Appendix: Full scale Images for circumference Tracking
+# Appendix: Full scale Images for circumference Tracking
 
 
 ### Circumference 
@@ -907,4 +633,4 @@ After some gains tuning the following tracking is achieved. The tracking is almo
 
 #### Backstepping vs Computed Torque
 
-![](./images/2020-06-03-16-46-33.png) -->
+![](./images/2020-06-03-16-46-33.png)

@@ -261,7 +261,8 @@ for i=1:length(t)
 
 
     % Backstepping Controller
-    tau = (M*(ddqr') + C*(dqr') + G + Kp*(s') + err')';      
+    tau = (M*(ddqr') + C*(dqr') ...
+        + G + Kp*(s') + err')';      
     
     % Robot joint accelerations
     ddq_old = ddq;
