@@ -27,34 +27,24 @@
     - [Pick and Place Results Overview](#pick-and-place-results-overview)
   - [Trajectory Tracking](#trajectory-tracking)
       - [The Backstepping Control](#the-backstepping-control)
+      - [Backstepping controller implementation](#backstepping-controller-implementation)
       - [Response to different trajectories speed and amplitude](#response-to-different-trajectories-speed-and-amplitude)
   - [Perturbations of Dynamical parameters and Adaptive strategies](#perturbations-of-dynamical-parameters-and-adaptive-strategies)
     - [Dynamic Regressor](#dynamic-regressor)
+    - [New Trajectories for the adaptive control](#new-trajectories-for-the-adaptive-control)
     - [Adaptive Computed Torque](#adaptive-computed-torque)
-    - [Li Slotine](#li-slotine)
+      - [Adaptive computed torque implementation:](#adaptive-computed-torque-implementation)
+      - [Adaptive computed torque results](#adaptive-computed-torque-results)
+      - [Adaptive computed torque limits](#adaptive-computed-torque-limits)
+    - [Li Slotine Controller](#li-slotine-controller)
+      - [Li Slotine Implementation](#li-slotine-implementation)
+      - [Li Slotine Results](#li-slotine-results)
     - [Adaptive Backstepping Control](#adaptive-backstepping-control)
-    - [Circumference](#circumference)
-      - [Computed Torque Controller](#computed-torque-controller)
-      - [Backstepping Controller](#backstepping-controller)
-      - [Controller Overview](#controller-overview)
-    - [Helix](#helix)
-      - [Desired Joint Trajectory:](#desired-joint-trajectory)
-      - [Computed Torque controller](#computed-torque-controller-1)
-      - [Backstepping Control](#backstepping-control)
-      - [Backstepping vs Computed Torque](#backstepping-vs-computed-torque)
+      - [Adaptive Backstepping Implementation](#adaptive-backstepping-implementation)
+      - [Adaptive Backstepping Results](#adaptive-backstepping-results)
+  - [Overview of the Results](#overview-of-the-results)
 
-<!-- ## Appendix A with results plot at full size
 
-  - [Circumference](#circumference)
-    - [Computed Torque Controller](#computed-torque-controller)
-    - [Backstepping Controller](#backstepping-controller)
-    - [Controller Overview](#controller-overview)
-  - [Helix](#helix)
-    - [Desired Joint Trajectory:](#desired-joint-trajectory)
-    - [Computed Torque controller](#computed-torque-controller-1)
-    - [Backstepping Control](#backstepping-control)
-    - [Backstepping vs Computed Torque](#backstepping-vs-computed-torque)
-  -->
 ## The robotic arm
 
 This  7 DOF Franka Emika Panda robot is  equipped  with 7 revolute joints, each mounting a torque sensor, and it has a total weight of approximately 18kg, having the possibility to handle payloads up to 3kg.
@@ -543,10 +533,34 @@ $$\psi =    0;                           $$ -->
 
 #### The Backstepping Control
 
+Considering a system written in the form:
 
-![](./images/2020-06-17-21-00-07.png)
+![](./images/2020-06-19-00-48-24.png)
 
-![](./images/2020-06-17-21-02-06.png)
+The backstepping controller assumes that a controller exists for the higher level system in the form of a stabilizing feedback law:
+![](./images/2020-06-19-00-48-34.png)
+
+The control for the second variable is computed so that it tends to track u’. This is done 
+![](./images/2020-06-19-00-48-45.png)
+
+For a completely actuated system the backstepping controller is reviewd in the follwing scheme:
+
+![](./images/2020-06-19-00-47-26.png)
+
+#### Backstepping controller implementation
+
+First, the necessary quantities are defined (reference velocity, tracking error).
+Then, the torque is defined as:
+<p align="center">
+<img src="./images/2020-06-19-09-07-28.png" alt="drawing" class="center" width="400 " />
+</p>
+
+
+<p align="center">
+<img src="./images/2020-06-19-00-58-09.png" alt="drawing" class="center" width="400 " />
+<img src="./images/2020-06-19-00-58-19.png" alt="drawing" class="center" width="353" />
+</p>
+
 <!-- The backstepping control can be used when system dynamics can be partitioned such that: 
 
 <p align="center">
@@ -612,14 +626,13 @@ Parameters for CT control:
 <!-- $$ Kp = diag([3, 3 ,3 ,3 ,5 ,3 ,30]) $$
 $$ Kv = 1/2 *diag([1 ,1 ,1 ,1 , 7 ,2 ,1]) $$ -->
 ![](./images/2020-06-10-19-36-07.png)
-
- <img src="./images/2020-06-04-00-56-19.png" alt="drawing" class="center" width="670" /> 
+</p>
 Parameters for Backstepping:
 <!-- $$Kp = 1* diag([1 ,1 ,1 ,1 ,3 ,1 ,1])$$ -->
 ![](./images/2020-06-10-19-36-31.png)
-
+<p align="center">
  <img src="./images/2020-06-04-01-00-38.png" alt="drawing" class="center" width="677" /> |
-
+</p>
 
 
 
@@ -629,7 +642,14 @@ The controllers provide very good performances despite of the speed of the refer
 
 ## Perturbations of Dynamical parameters and Adaptive strategies
 
-What happens if dynamical parameters estimation is biased? 
+We have demonstrated that most of these controllers are based on a strong assumption, perfect knowledge. This is never the case. In the next example it is clear how just introducing a light friction in the robotic arm causes troubles for the computed torque controller: 
+
+![](./images/2020-06-19-00-59-36.png)
+
+Usually, a perfect knowledge of the dynamical matrices is not known, and the controllers must rely on estimates.
+In such a case, 
+
+In the following section some dynamical parameters (the masses) are increased up to 2.5%.
 
 ```
 for j = 1:num_of_joints % for each joint/link
@@ -637,25 +657,19 @@ for j = 1:num_of_joints % for each joint/link
 end
 ```
 
-In the following section dynamical parameters are increased up to 2.5%.
-
 ### Dynamic Regressor
 
-<!-- $$\text{The dynamic regressor is a matrix function employed to write the dynamics linearly in the inertial parameters:}$$ -->
-![](2020-06-18-18-08-37.png)
+The dynamic regressor is a matrix function employed to write the dynamics linearly in the inertial parameters:
+
+![](./images/2020-06-18-18-08-37.png)
+
 <p align="center">
 <!-- <img src="./images/faster_trajectory.gif" alt="drawing" class="center" width="410" /> -->
 <img src="./images/2020-06-18-10-04-21.png" alt="drawing" class="center" width="433" />
 </p>
 
 
-
-<p align="center">
-<!-- <img src="./images/faster_trajectory.gif" alt="drawing" class="center" width="410" /> -->
-<img src="./images/2020-06-18-10-14-37.png" alt="drawing" class="center" width="933" />
-</p>
-
-The Dynamic regressor an be computed in closed form from the Lagrangian formulation.\\
+The Dynamic regressor an be computed in closed form from the Lagrangian formulation.
 The lagrangian of a serial chain is defined as: 
 
 
@@ -693,6 +707,37 @@ The regressor has been computed in Wolfram Mathematica 12, using the Screw Calcl
 The computation of the regressor for the Kinova 7DOF manipulator revealed to be too expensive, therefore I proceeded to compute the regressor for a simplyfied version of the robot (removing the last two links). The computation for the 5 DOF arm infact was the limit in terms of the sheer size of the output that mathematica could handle.
 
 From now on I will refer to this simplyfied model.
+
+
+### New Trajectories for the adaptive control
+
+- Trajectory I
+
+THe first trajectory is not expected to be sufficiently rich (eg. to excite all the joints ) to be able to estimate all dynamical parameters correctly. (The first joint remains constant)
+  
+<p align="center">
+<!-- <img src="./images/faster_trajectory.gif" alt="drawing" class="center" width="410" /> -->
+<img src="circumference_kuka.gif" alt="drawing"  width="633" />
+</p>
+
+<p align="center">
+<!-- <img src="./images/faster_trajectory.gif" alt="drawing" class="center" width="410" /> -->
+<img src="./images/2020-06-19-00-43-01.png" alt="drawing" class="center" width="633" />
+</p>
+
+The second trajectory will excite all the joints. Further experiment must be conducted to understand if it is "sufficiently rich"
+
+- Trajectory II
+<p align="center">
+<!-- <img src="./images/faster_trajectory.gif" alt="drawing" class="center" width="410" /> -->
+<img src="circumference_kuka.gif" alt="drawing" class="center" width="633" />
+</p>
+
+<p align="center">
+<!-- <img src="./images/faster_trajectory.gif" alt="drawing" class="center" width="410" /> -->
+<img src="./images/2020-06-19-00-43-25.png" alt="drawing" class="center" width="633" />
+</p>
+
 
 ### Adaptive Computed Torque
 
@@ -769,142 +814,138 @@ In this case:
 
 The problems for this control are the invertibility of the estimated Mass matrix and the need for joint accelleration measurements.
 
+#### Adaptive computed torque implementation:
 
+<!-- ![]() -->
 
-### Li Slotine
+<p align="center">
+<!-- <img src="./images/faster_trajectory.gif" alt="drawing" class="center" width="410" /> -->
+<img src="./images/2020-06-19-00-44-05.png" alt="drawing" class="center" width="1083" />
+</p>
+
+#### Adaptive computed torque results
+<p align="center">
+<!-- <img src="./images/faster_trajectory.gif" alt="drawing" class="center" width="410" /> -->
+<img src="./images/2020-06-19-00-44-37.png" alt="drawing" class="center" width="650" />
+</p>
+
+<p align="center">
+<!-- <img src="./images/faster_trajectory.gif" alt="drawing" class="center" width="410" /> -->
+<img src="./images/2020-06-19-00-44-46.png" alt="drawing" class="center" width="650" />
+</p>
+
+![]()
+
+#### Adaptive computed torque limits
+
+The Adaptive computed torque method was the first adaptive method to be used on robotics manipulator. It is surely an important mileston but suffers some limits:
+- The Estimated Mass matrix is not always invertible.
+
+- It is usually very difficult to get clean acceleration measurements.
+
+This problems will be solved in the Li-Slotine and Backstepping controllers.
+
+### Li Slotine Controller
 
 The Li Slotine control uses the reference velocity:
 
 <p align="center">
 <!-- <img src="./images/faster_trajectory.gif" alt="drawing" class="center" width="410" /> -->
-<img src="./images/2020-06-04-00-46-36.png" alt="drawing" class="center" width="433" />
+<img src="./images/2020-06-18-11-46-02.png" alt="drawing" class="center" width="833" />
 </p>
-![](2020-06-18-11-46-02.png)
 
 where:
 
 <p align="center">
 <!-- <img src="./images/faster_trajectory.gif" alt="drawing" class="center" width="410" /> -->
-<img src="./images/2020-06-04-00-46-36.png" alt="drawing" class="center" width="433" />
+<img src="./images/2020-06-18-11-46-17.png" alt="drawing" class="center" width="833" />
 </p>
-![](2020-06-18-11-46-17.png)
+
 
 The control torque is:
 
 <p align="center">
 <!-- <img src="./images/faster_trajectory.gif" alt="drawing" class="center" width="410" /> -->
-<img src="./images/2020-06-04-00-46-36.png" alt="drawing" class="center" width="433" />
+<img src="./images/2020-06-18-11-46-47.png" alt="drawing" class="center" width="833" />
 </p>
-![](2020-06-18-11-46-47.png)
+
 
 Deriving the Lyapunov Function:
 
 <p align="center">
 <!-- <img src="./images/faster_trajectory.gif" alt="drawing" class="center" width="410" /> -->
-<img src="./images/2020-06-04-00-46-36.png" alt="drawing" class="center" width="433" />
+<img src="./images/2020-06-18-11-47-05.png" alt="drawing" class="center" width="733" />
 </p>
-![](2020-06-18-11-47-05.png) 
+
 and substituting the torque we have:
 
 <p align="center">
 <!-- <img src="./images/faster_trajectory.gif" alt="drawing" class="center" width="410" /> -->
-<img src="./images/2020-06-04-00-46-36.png" alt="drawing" class="center" width="433" />
+<img src="./images/2020-06-18-11-47-24.png" alt="drawing" class="center" width="733" />
 </p>
-![](2020-06-18-11-47-24.png)
 
 Choosing the following dynamics for the dynamical paremeters estimation:
+<p align="center">
+<!-- <img src="./images/faster_trajectory.gif" alt="drawing" class="center" width="410" /> -->
+<img src="./images/2020-06-18-11-47-50.png" alt="drawing" class="center" width="733" />
+</p>
 
-![](2020-06-18-11-47-50.png)
 
 A s.n.d derivative is obtained:
+<p align="center">
+<!-- <img src="./images/faster_trajectory.gif" alt="drawing" class="center" width="410" /> -->
+<img src="./images/2020-06-18-11-48-09.png" alt="drawing" class="center" width="733" />
+</p>
 
-![](2020-06-18-11-48-09.png)
 
 Using the Barbalat Lemma the asymptotic stability is achieved.
 
+#### Li Slotine Implementation
+
+![](./images/2020-06-19-01-10-50.png)
+
+#### Li Slotine Results
+
+![](./images/2020-06-19-09-41-54.png)
+
+Dynamical parameters estimation is decent: for joints 3,4,5 the mass seems to converge to the right value, while for joints 1 and 2 it doesn't. This could depend from the trajectory which has not sufficient information to make the parameters estimation converges for each joint. The R matrix can surely be tuned more to achieve better estimation, but the simulation are computationally expensive so limited trials were made.
+
+![](./images/2020-06-19-09-42-37.png)
 
 ### Adaptive Backstepping Control
 
 
+![](./images/2020-06-19-01-05-31.png)
 
 
+#### Adaptive Backstepping Implementation
+
+![](./images/2020-06-19-01-05-45.png)
 
 
+#### Adaptive Backstepping Results
 
+![](./images/2020-06-19-09-54-32.png)
 
+![](./images/2020-06-19-09-56-10.png)
 
-
-
-
-
-
-
+## Overview of the Results
  
-  
-   
+All the results are stored in:
 
+```
+adaptive_backstepping.mat
+adaptive_backstepping_dyn_pars.mat
+computed_torque.mat
+computed_torque_dyn_pars.mat
+li-slotine.mat
+li-slotine_dyn_pars.mat
+```
+
+
+The adaptive computed toruqe method 
 
 
        
 
 
-
-
-
-<!-- # Appendix: Full scale Images for circumference Tracking
-
-
-### Circumference 
-
-
-![](./images/circumference.gif)
-
-Desired joint trajectories:
-
-![](./images/2020-05-28-19-41-46.png)
-
-#### Computed Torque Controller
-
-
-![](./images/2020-06-03-17-53-57.png)
-
-
-#### Backstepping Controller
-
-In order to implement the backstepping controller I have to define some other quantities.
-
-$$\tau = M*ddqr + C*dqr + F + G + Kp*s + err $$
-
-![](./images/2020-06-03-17-51-02.png)
-
-#### Controller Overview
-
-![](./images/2020-06-03-17-50-01.png)
-
-### Helix 
-
-![](./images/helix2.gif)
-
-#### Desired Joint Trajectory:
-
-![](./images/2020-06-03-14-44-44.png)
-
-#### Computed Torque controller
-
-The controller applies the following torque:
-
-
-$$\tau = ( M*(ddq_{des} + Kv*derr + Kp*err) + C*dq + F + G )$$
-
-
-After some gains tuning the following tracking is achieved. The tracking is almost perfect but again, the computed torque method requires complete knowledge of the dynamical system. It is much more interesting to understand what happens when there are dynamical parameters uncertainties.
-
-![](./images/2020-06-03-16-39-35.png)
-
-#### Backstepping Control
-
-![](./images/2020-06-03-16-44-13.png)
-
-#### Backstepping vs Computed Torque
-
-![](./images/2020-06-03-16-46-33.png) -->

@@ -63,7 +63,7 @@ switch choiche
         x = center(1) + radius * cos(t/t(end)*2*pi);
         y = center(2) * ones(size(x));
         z = center(3) + radius * sin(t/t(end)*2*pi);
-        theta = 0.1*sin(t/3*2*pi);
+        theta = 0.5*sin(t/3*2*pi);
         
         phi = zeros(size(x));
         psi = zeros(size(x));
@@ -115,7 +115,7 @@ switch choiche
 end
 
 %% Visualize desired trajectory
-
+% 
 figure
 
 plot3(x,y,z,'r','Linewidth',1.5)
@@ -131,147 +131,147 @@ end
 
 %% Plot Joint Trajectories
 
-
-figure
-for j=1:num_of_joints
-    
-    subplot(3,2,j);
-    plot(t,q_des(j,1:length(t)))
-    xlabel('time [s]');
-    ylabeltext = sprintf('_%i [rad]',j);
-    ylabel(['Joint position' ylabeltext]);
-    grid;
-end
+% 
+% figure
+% for j=1:num_of_joints
+%     
+%     subplot(3,2,j);
+%     plot(t,q_des(j,1:length(t)))
+%     xlabel('time [s]');
+%     ylabeltext = sprintf('_%i [rad]',j);
+%     ylabel(['Joint position' ylabeltext]);
+%     grid;
+% end
 
 
 %% Trajectory Tracking: Computed Torque Method
-
-
-% Gain circumference parameters matrix
-Kp = 20*diag([3 3 3 3 5 ]);
-Kv = 10*diag([1 1 1 1 1]);
-
-% Good Helix parameters matrix
-% Kp = 200*diag([3 3 3 3 5 3 5]);
-% Kv = 25*diag([1 1 1 1 70 2 70]);
-
-results_computed_torque = q0;
-index = 1;
-q=q0
-dq=q_dot0
-ddq=[0 0 0 0 0 ]
-for i=1:length(t)
-
-   % Error and derivate of the error   
-    err = transpose(q_des(:,i)) - q;
-    derr = transpose(dq_des(:,i)) - dq;
-    
-%     %Get dynamic matrices
-%     G = get_GravityVector(q);
-%     C= get_CoriolisVector(q,dq);
-%     M = get_MassMatrix(q);
-    
-    M = KUKA.inertia(q); 
-    C = KUKA.coriolis(q,dq); 
-    G = KUKA.gravload(q); 
-    
-
-    % Computed Torque Controller
-    
-    tau = ( M*(ddq_des(:,i) + Kv*(derr') + Kp*(err')) + (dq*C)' + G' )';
-      
-    % Robot joint accelerations
-    ddq_old = ddq;
-    ddq = (pinv(M)*(tau' - (dq*C)'- G'))';
-        
-    % Tustin integration
-    dq_old = dq;
-    dq = dq + (ddq_old + ddq) * delta_t / 2;
-    q = q + (dq + dq_old) * delta_t /2;
-    
-    % Store result for the final plot
-    results_computed_torque(index,:) = q;
-    index = index + 1;
-
-end
+% 
+% 
+% % Gain circumference parameters matrix
+% Kp = 20*diag([3 3 3 3 5 ]);
+% Kv = 10*diag([1 1 1 1 1]);
+% 
+% % Good Helix parameters matrix
+% % Kp = 200*diag([3 3 3 3 5 3 5]);
+% % Kv = 25*diag([1 1 1 1 70 2 70]);
+% 
+% results_computed_torque = q0;
+% index = 1;
+% q=q0
+% dq=q_dot0
+% ddq=[0 0 0 0 0 ]
+% for i=1:length(t)
+% 
+%    % Error and derivate of the error   
+%     err = transpose(q_des(:,i)) - q;
+%     derr = transpose(dq_des(:,i)) - dq;
+%     
+% %     %Get dynamic matrices
+% %     G = get_GravityVector(q);
+% %     C= get_CoriolisVector(q,dq);
+% %     M = get_MassMatrix(q);
+%     
+%     M = KUKA.inertia(q); 
+%     C = KUKA.coriolis(q,dq); 
+%     G = KUKA.gravload(q); 
+%     
+% 
+%     % Computed Torque Controller
+%     
+%     tau = ( M*(ddq_des(:,i) + Kv*(derr') + Kp*(err')) + (dq*C)' + G' )';
+%       
+%     % Robot joint accelerations
+%     ddq_old = ddq;
+%     ddq = (pinv(M)*(tau' - (dq*C)'- G'))';
+%         
+%     % Tustin integration
+%     dq_old = dq;
+%     dq = dq + (ddq_old + ddq) * delta_t / 2;
+%     q = q + (dq + dq_old) * delta_t /2;
+%     
+%     % Store result for the final plot
+%     results_computed_torque(index,:) = q;
+%     index = index + 1;
+% 
+% end
 
 %% Plot computed torque results for trajectory tracking
 
-figure
-for j=1:num_of_joints
-    subplot(4,2,j);
-    plot(t(1:10001),results_computed_torque(1:10001,j))
-%     legend ()
-    hold on
-    plot (t,q_des(j,1:length(t)))
-    legend ('Computed Torque','Desired angle')
-    grid;
-end
+% figure
+% for j=1:num_of_joints
+%     subplot(4,2,j);
+%     plot(t(1:10001),results_computed_torque(1:10001,j))
+% %     legend ()
+%     hold on
+%     plot (t,q_des(j,1:length(t)))
+%     legend ('Computed Torque','Desired angle')
+%     grid;
+% end
 
 
 %% Trajectory tracking: Backstepping control
 
-
-% Good Circumference parameters
-Kp = 1* diag([1 1 1 1 3 1 1]);
-
-% Good Helix parameters
-% Kp = diag([1 1 1 1 3 1 1]);
-
-
-results_backstepping = q0;
-index = 1;
-q=q0
-dq=q_dot0
-ddq=[0 0 0 0 0 0 0]
-for i=1:length(t)
-
-   % Error and derivate of the error   
-    err = transpose(q_des(:,i)) - q;
-    derr = transpose(dq_des(:,i)) - dq;
-    
-    dqr = transpose(dq_des(:,i)) + err*(Kp);
-    ddqr = transpose(ddq_des(:,i)) + derr*(Kp);
-    s = derr + err*(Kp');
-     
-    %Get dynamic matrices
-    F = get_FrictionTorque(dq);
-    G = get_GravityVector(q);
-    C = get_CoriolisMatrix(q,dq);
-    M = get_MassMatrix(q);
-
-
-    % Backstepping Controller
-    tau = (M*(ddqr') + C*(dqr') + G + Kp*(s') + err')';      
-    
-    % Robot joint accelerations
-    ddq_old = ddq;
-    ddq = (pinv(M)*(tau' - transpose(C*(dq'))- G')')';
-        
-    % Tustin integration
-    dq_old = dq;
-    dq = dq + (ddq_old + ddq) * delta_t / 2;
-    q = q + (dq + dq_old) * delta_t /2;
-    
-    % Store result for the final plot
-    results_backstepping(index,  :) = q;
-    index = index + 1;
-
-end
+% 
+% % Good Circumference parameters
+% Kp = 1* diag([1 1 1 1 3 1 1]);
+% 
+% % Good Helix parameters
+% % Kp = diag([1 1 1 1 3 1 1]);
+% 
+% 
+% results_backstepping = q0;
+% index = 1;
+% q=q0
+% dq=q_dot0
+% ddq=[0 0 0 0 0 0 0]
+% for i=1:length(t)
+% 
+%    % Error and derivate of the error   
+%     err = transpose(q_des(:,i)) - q;
+%     derr = transpose(dq_des(:,i)) - dq;
+%     
+%     dqr = transpose(dq_des(:,i)) + err*(Kp);
+%     ddqr = transpose(ddq_des(:,i)) + derr*(Kp);
+%     s = derr + err*(Kp');
+%      
+%     %Get dynamic matrices
+%     F = get_FrictionTorque(dq);
+%     G = get_GravityVector(q);
+%     C = get_CoriolisMatrix(q,dq);
+%     M = get_MassMatrix(q);
+% 
+% 
+%     % Backstepping Controller
+%     tau = (M*(ddqr') + C*(dqr') + G + Kp*(s') + err')';      
+%     
+%     % Robot joint accelerations
+%     ddq_old = ddq;
+%     ddq = (pinv(M)*(tau' - transpose(C*(dq'))- G')')';
+%         
+%     % Tustin integration
+%     dq_old = dq;
+%     dq = dq + (ddq_old + ddq) * delta_t / 2;
+%     q = q + (dq + dq_old) * delta_t /2;
+%     
+%     % Store result for the final plot
+%     results_backstepping(index,  :) = q;
+%     index = index + 1;
+% 
+% end
 
 %% Plot computed torque results for backstepping control
 
-figure
-for j=1:num_of_joints
-    subplot(4,2,j);
-    plot(t,results_backstepping(:,j))
-    hold on
-    plot (t,q_des(j,1:length(t)))
+% figure
+% for j=1:num_of_joints
+%     subplot(4,2,j);
+%     plot(t,results_backstepping(:,j))
 %     hold on
-%     plot(t,results_computed_torque(:,j))
-    grid;
-    legend ('Backstepping Results','Desired angle')
-end
+%     plot (t,q_des(j,1:length(t)))
+% %     hold on
+% %     plot(t,results_computed_torque(:,j))
+%     grid;
+%     legend ('Backstepping Results','Desired angle')
+% end
 
 
 %% Mass disturbance of d%
@@ -281,7 +281,7 @@ load('robotmodel.mat')
 n=5
 d = 1;
 for j = 1:n 
-    KUKAmodel.links(j).m = KUKAmodel.links(j).m .* (1.025); 
+    KUKAmodel.links(j).m = KUKAmodel.links(j).m .* (1.05); 
 end
 
 
@@ -313,13 +313,13 @@ piArray(1,:) = pi0;
 %%  
 
  
-Kp = 1*diag([1 1 1 1 1]);
-Kv = 0.01*diag([30 30 30 10 5]); 
-Kd = 0.01*diag([30 30 30 10 5]);
+Kp = 1*diag([200 200 200 20 10]);
+Kv = 0.1*diag([200 200 200 10 1]); 
+Kd = 0.1*diag([200 200 200 20 1]);
 
 R = diag(repmat([1e1 repmat(1e3,1,3) 1e2 1e7 1e7 1e2 1e7 1e2],1,n)); 
-P = 0.001*eye(10);
-lambda = diag([5, 5, 5, 5, 5]);
+P = 0.01*eye(10);
+lambda = diag([200, 200, 200, 200, 200])*0.03;
 
 qd_dot=dq_des';
 qd_ddot=ddq_des';
@@ -342,36 +342,27 @@ for i = 2:length(t)
         qr_ddot(i-1,:) = (qr_dot(i-1) - qr_dot(i-2)) / delta_t;
     end
     
-    for j = 1:n 
-        KUKAmodel.links(j).m = piArray(i-1,(j-1)*10+1); % elemento 1 di pi
-    end
+%     for j = 1:n 
+%         KUKAmodel.links(j).m = piArray(i-1,(j-1)*10+1); % elemento 1 di pi
+%     end
     
     Mtilde = KUKAmodel.inertia(q(i-1,:)); 
     Ctilde = KUKAmodel.coriolis(q(i-1,:),q_dot(i-1,:)); 
     Gtilde = KUKAmodel.gravload(q(i-1,:)); 
 
+    
+% ADAPTIVE COMPUTED TORQUE    
     tau(i,:) = qd_ddot(i-1,:)*Mtilde' + q_dot(i-1,:)*Ctilde'...
         + Gtilde + e_dot*Kv' + e*Kp';
-    
-    
-%     tau(i,:) = qd_ddot(i-1,:)*M' + q_dot(i-1,:)*C' + G + e_dot*Kv' + e*Kp';
-% switch sel2
-%     case 1
-         
-%     case 2
-%         tau(i,:) = qd_ddot(i-1,:)*Mtilde' + q_dot(i-1,:)*Ctilde' + Gtilde + e_dot*Kv' + e*Kp';
-%     case 3
+%   
 
+%  LI SLOTINE
+%         tau(i,:) = qr_ddot(i-1,:)*Mtilde'...
+%             + qr_dot(i-1,:)*Ctilde' + Gtilde + s*Kd'; 
 
-        tau(i,:) = qr_ddot(i-1,:)*Mtilde'...
-            + qr_dot(i-1,:)*Ctilde' + Gtilde + s*Kd'; 
+%  ADAPTIVE BACKSTEPPING
+%     tau(i,:) = qr_ddot(i-1,:)*Mtilde' + qr_dot(i-1,:)*Ctilde' + Gtilde + s*Kd' + e*Kp'; 
 
-
-%     case 4
-
-
-%         tau(i,:) = qr_ddot(i-1,:)*Mtilde' + qr_dot(i-1,:)*Ctilde' + Gtilde + s*Kd' + e*Kp'; 
-% end
     
     
     M = KUKA.inertia(q(i-1,:)); 
@@ -408,18 +399,21 @@ for i = 2:length(t)
 
     regressor2;
 
-    piArray_dot = ( R^(-1) * Y' * (Mtilde')^(-1) * [zeros(n) eye(n)] * P * [e e_dot]' )'; 
+    
+% COMPUTED TORQUE DYNAMICAL PARAMETERS DYNAMICS
 
-    piArray(i,:) = piArray(i-1,:) + delta_t*piArray_dot; 
+%     piArray_dot = ( R^(-1) * Y' * (Mtilde')^(-1) * [zeros(n) eye(n)] * P * [e e_dot]' )'; 
+%  
+%     piArray(i,:) = piArray(i-1,:) + delta_t*piArray_dot; 
 
-%     
-    if sel2==3
-        
-        piArray_dot = (R^(-1) * Y' * s')';  
-        
-        piArray(i,:) = piArray(i-1,:) + delta_t*piArray_dot; 
-        
-    end
+% BACKSTEPPING DYNAMICAL PARAMETERS DYNAMICS
+
+% 
+%     piArray_dot = (R^(-1) * Y' * s')';  
+% 
+%     piArray(i,:) = piArray(i-1,:) + delta_t*piArray_dot; 
+%         
+ 
 
     if mod(i,100) == 0
         
