@@ -943,7 +943,6 @@ li-slotine_dyn_pars.mat
 ```
 
 
-The adaptive computed toruqe method 
 
 
        
