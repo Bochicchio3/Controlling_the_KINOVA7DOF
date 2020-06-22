@@ -43,6 +43,7 @@
       - [Adaptive Backstepping Implementation](#adaptive-backstepping-implementation)
       - [Adaptive Backstepping Results](#adaptive-backstepping-results)
   - [Overview of the Results](#overview-of-the-results)
+    - [Final remarks](#final-remarks)
 
 
 ## The robotic arm
@@ -178,6 +179,8 @@ In this file, another manipulator was chosen, as I encountered difficulties in t
 Therefore, I switched to the arm implemented in the robotics toolbox, the KUKA 5 DOF robot.
 
 This file has a similar structure: in the first section the trajectory is computed, then the Computed Torque and Backstepping controller are calculated exactly as before. At the end, the mass of the model is modified and the Adaptive Controllers are implemented.
+
+Each implementation will be specifically addressed in the respective adaptive controller section.
 
 ### Reference Trajectories
 
@@ -552,7 +555,7 @@ For a completely actuated system the backstepping controller is reviewd in the f
 First, the necessary quantities are defined (reference velocity, tracking error).
 Then, the torque is defined as:
 <p align="center">
-<img src="./images/2020-06-19-09-07-28.png" alt="drawing" class="center" width="400 " />
+<img src="./images/2020-06-19-09-07-28.png" alt="drawing" class="center" width="300 " />
 </p>
 
 
@@ -656,6 +659,8 @@ for j = 1:num_of_joints % for each joint/link
     KUKAmodel.links(j).m = KUKAmodel.links(j).m .* (1+randi(5,1)/100); %masse [1x1]
 end
 ```
+
+Central to every adaptive controller is the Dynamic Regressor formulation that allows for a formulation that groups all the uncertainties in the estimation of the dynamic parameters.
 
 ### Dynamic Regressor
 
@@ -834,7 +839,9 @@ The problems for this control are the invertibility of the estimated Mass matrix
 <img src="./images/2020-06-19-00-44-46.png" alt="drawing" class="center" width="650" />
 </p>
 
-![]()
+This controller has a lot of margin for improvements by tuning the gains for both the error and the dynamic parameters dynamics.
+
+
 
 #### Adaptive computed torque limits
 
@@ -942,9 +949,39 @@ li-slotine.mat
 li-slotine_dyn_pars.mat
 ```
 
+We have shown how adaptive controllers are fundamentals for robust control of the robotics manipulator in the presence of uncertainties in the dynamical or friction parameters.
+These are examples of how fast the computed torque performances degragadates in the presence of noise in the knowledge of the system parameters.
+
+<p align="center">
+<img src="2020-06-22-01-25-45.png" alt="drawing" class="center" width="420" />
+<img src="2020-06-22-01-26-55.png" alt="drawing" class="center" width="433" />
+</p>
+The adaptive computed torque approach is based on complete linearization of the system but suffers some problems such as the need of acceleration estimation which is usually very noisy and the inverse of the Estimated Mass Matrix must be computed and it doesn't necessarly exists.
+
+The Li Slotine and the Backstepping Adaptive Controller solve this issues, help to estimate the dynamical parameters and are able to control the system even with significative uncertainties.
+
+
+In terms of performances all the adpative controllers provide very good tracking error if tuned properly. The dynamical estimation of the parameters is where they differ the most. The following comparison is provided:
 
 
 
-       
+
+<p align="center">
+<img src="2020-06-22-01-47-31.png" alt="drawing" class="center" width="310" />
+<img src="./images/2020-06-19-09-42-37.png" alt="drawing" class="center" width="295" />
+<img src="./images/2020-06-19-09-56-10.png" alt="drawing" class="center" width="270" />
+</p>
+
+
+From this graph it is clear than when tuned properly the dynamical parameters estimation is the most accurate ( and fastest as well ) for the adaptive computed torque
+
+
+
+### Final remarks
+
+Adaptive controllers computation required significantly more computational burden than non adpative simulations. 
+This is a hint on how difficult it can be to robustly control manipulators in real time in the presence of uncertanties in the dynamical model. 
+
+However, very good parameteric estimation can be made and Symbolic regressors can be built by performing experiments where the required quantities are measured (torques and control inputs). Doing an offline parametric identification can lead to the creation of an accurate model. The main limitation for such techniques is that accurate torque measurements are not always available. This is why the Kinova 7 DOF arm, with its force torque sensors at the joints, provides superior capabilities and allows for high performance control, and is being widely adopted in the industry.
 
 

@@ -155,6 +155,7 @@ Comparative plots for the pick and place scenario can be found in
 - Non adaptive control
 
 
+
 - Adaptive control
 
 ### Reference Trajectories

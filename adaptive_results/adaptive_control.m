@@ -281,7 +281,7 @@ load('robotmodel.mat')
 n=5
 d = 1;
 for j = 1:n 
-    KUKAmodel.links(j).m = KUKAmodel.links(j).m .* (1.3); 
+    KUKAmodel.links(j).m = KUKAmodel.links(j).m .* (2); 
 end
 
 
