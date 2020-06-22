@@ -209,17 +209,16 @@ end
 
 %% Plot computed torque results for trajectory tracking
 
-figure
-for j=1:num_of_joints
-    subplot(4,2,j);
-    plot(t(1:10001),results_computed_torque(1:10001,j))
-%     legend ()
-    hold on
-    plot (t,q_des(j,1:length(t)))
-    plot(t(1:10001),results_computed_torque2(1:10001,j))
-    legend ('Computed Torque','Desired angle', 'Computed Torque with wrong estimation')
-    grid;
-end
+% figure
+% for j=1:num_of_joints
+%     subplot(4,2,j);
+%     plot(t(1:10001),results_computed_torque(1:10001,j))
+% %     legend ()
+%     hold on
+%     plot (t,q_des(j,1:length(t)))
+%     legend ('Computed Torque','Desired angle')
+%     grid;
+% end
 
 
 %% Trajectory tracking: Backstepping control

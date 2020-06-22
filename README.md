@@ -973,7 +973,9 @@ In terms of performances all the adpative controllers provide very good tracking
 </p>
 
 
-From this graph it is clear than when tuned properly the dynamical parameters estimation is the most accurate ( and fastest as well ) for the adaptive computed torque
+The adaptive computed torque has the fastest dynamics and is the most precise if tuned properly (In the figure joint 2 and 3 were not tuned properly)
+The Backstepping controller is more precise than the Li-Slotine controller, with less oscillation and more steady behaviour. Both however have quite similar performances relative to the computed torque approach.
+
 
 
 
@@ -982,6 +984,6 @@ From this graph it is clear than when tuned properly the dynamical parameters es
 Adaptive controllers computation required significantly more computational burden than non adpative simulations. 
 This is a hint on how difficult it can be to robustly control manipulators in real time in the presence of uncertanties in the dynamical model. 
 
-However, very good parameteric estimation can be made and Symbolic regressors can be built by performing experiments where the required quantities are measured (torques and control inputs). Doing an offline parametric identification can lead to the creation of an accurate model. The main limitation for such techniques is that accurate torque measurements are not always available. This is why the Kinova 7 DOF arm, with its force torque sensors at the joints, provides superior capabilities and allows for high performance control, and is being widely adopted in the industry.
+However, very good parameteric estimation can be made and Symbolic regressors can be built by performing experiments where the required quantities are measured (torques and control inputs). Doing an offline parametric identification can lead to the creation of an accurate model. The main limitation for such techniques is that accurate torque measurements are not always available. This is why the Kinova 7 DOF arm, with its force torque sensors at the joints, provides superior capabilities and allows for high performance control, and this is why it is being widely adopted in the industry.
 
 
